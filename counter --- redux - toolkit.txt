@@ -1,0 +1,97 @@
+****** 1 *****
+npm i @reduxjs/toolkit react-redux
+create reux folder in src and inside it create 2 files
+1 - store.js
+2 - counterSlice.js
+
+
+****** 2 *****
+counterSlice.js
+
+import { createSlice }  from "@reduxjs/toolkit"
+
+export const counterSlice = createSlice({
+name: `counter`,
+initialState: {
+value: 0
+},
+reducers: {
+increment: (state)=>{
+state.value += 1 ;
+},
+decrement(state)=>{
+state.value -= 1 ;
+},
+incrementByAmount: (state, action)=>{
+state.value += action.payload ;
+},
+}
+})
+
+export const { increment, decerement, incrementByAmount } = counterSlice.actions;
+export default counterSlice.reducer
+
+****** 3 *****
+store.js
+
+import { configureStore } from "@reduxjs/toolkit"
+import counterReducer from "./counterSlice"
+
+export default configureStore({
+reducer: {
+counter : counterReducer
+}
+})
+
+****** 4 *****
+index.js
+
+import { Provider } from "react-redux"
+import store from "./redux/store"
+
+<Provider store={store}>
+<App />
+</Provider>
+
+****** 5 *****
+how to use
+
+HomePage.jsx
+import { useSelector, useDispatch } from "react-redux";
+import { decrement, increment, incrementByAmount } from "../../redux/counterSlice";
+
+const HomePage = () => {
+  const [number,setNumber] = useState(0)
+  const { value } = useSelector(state => state.counter)
+  const dispatch = useDispatch()
+
+  return (
+    <div className="home-page">
+      <p>value is: { value }</p>
+      <button onClick={()=>dispatch(increment())}>+</button>
+      <button onClick={()=>dispatch(decrement())}>-</button>
+      <input type="number" value={number} onChange={(e)=>setNumber(Number(e.target.value))} /> 
+      <button onClick={()=>dispatch(incrementByAmount(number))}>Increase By Amont</button>
+    
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,133 @@
+****** 1 *****
+npm i @reduxjs/toolkit react-redux
+create reux folder in src and inside it create 2 files
+1 - store.js
+2 - counterSlice.js
+
+
+****** 2 *****
+userSlice.js
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+
+export const userUpdate2 = createAsyncThunk("user/update", async (user) => {
+  const res = await axios.post(`https://reqres.in/api/login`, user);
+  return res.data;
+});
+// export const userDelete = createAsyncThunk("user/update", async (user) => {
+//   const res = await axios.post(`https://reqres.in/api/login`, user);
+//   return res.data;
+// });
+
+export const userSlice = createSlice({
+  name: `user`,
+  initialState: {
+    userInfo: {
+      name: ``,
+      email: ``,
+    },
+    isPending: false,
+    error: false,
+  },
+  reducers: {},
+  extraReducers: {
+    [userUpdate2.pending]: (state) => {
+        state.isPending = true;
+        state.error = false;
+    },
+    [userUpdate2.fulfilled]: (state, action) => {
+        state.isPending = false;
+        state.error = false;
+        state.userInfo = action.payload;
+    },
+    [userUpdate2.rejected]: (state) => {
+        state.isPending = false;
+        state.error = true;
+    },
+  },
+
+//   extraReducers: {
+//     [userDelete.pending]: (state) => {
+//         state.isPending = true;
+//         state.error = false;
+//     },
+//     [userDelete.fulfilled]: (state, action) => {
+//         state.isPending = false;
+//         state.error = false;
+//         state.userInfo = action.payload;
+//     },
+//     [userDelete.rejected]: (state) => {
+//         state.isPending = false;
+//         state.error = true;
+//     },
+//   },
+});
+
+// export const { updateStart, updateSuccess, updateError } = userSlice.actions;
+export default userSlice.reducer;
+
+
+
+****** 3 *****
+store.js
+
+import { configureStore } from "@reduxjs/toolkit";
+import userReducer from "./userSlice"
+
+export default configureStore({
+    reducer: {
+        user: userReducer
+    }
+})
+
+
+****** 4 *****
+index.js
+
+import { Provider } from "react-redux";
+import store from "./redux/store";
+
+  <Provider store={store}>
+        <App />
+  </Provider>
+
+
+****** 5 *****
+how to use
+
+
+
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { update, clearUser } from "../../redux/userSlice";
+import "./HomePage.css";
+
+const HomePage = () => {
+  const [name,setName] = useState(``)
+  const [email,setEmail] = useState(``)
+
+  const { name : reduxName, email: reduxEmail } = useSelector(state=> state.user)
+  const dispatch = useDispatch()
+
+  const clickk = () => {
+    if(name !== `` && email !== ``){
+      dispatch(update({name, email}))
+      setEmail(``)
+      setName(``)
+    }
+  }
+  return (
+    <div className="home-page">
+      <p>your info: name: {reduxName} & email:{reduxEmail} </p><br /><br />
+      <input type="text" value={name} onChange={(e)=>setName(e.target.value)} /> <br /><br />
+      <input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} /> <br /><br />
+      <button onClick={clickk}>UPDATE</button>
+      <button onClick={()=>dispatch(clearUser())}>Clear User</button>
+    
+    </div>
+  );
+};
+
+export default HomePage;
+

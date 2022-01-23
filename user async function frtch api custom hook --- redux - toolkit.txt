@@ -1,0 +1,129 @@
+****** 1 *****
+npm i @reduxjs/toolkit react-redux
+create reux folder in src and inside it create 2 files
+1 - store.js
+2 - counterSlice.js
+3 - apiCall.js
+
+
+****** 2 *****
+counterSlice.js
+import { createSlice } from "@reduxjs/toolkit";
+
+export const userSlice = createSlice({
+    name: `user`,
+    initialState: {
+        name: ``,
+        email: ``
+    },
+    reducers: {
+        update: (state, action) => {
+            state.name = action.payload.name;
+            state.email = action.payload.email;
+        },
+        clearUser: (state)=>(state =  {})
+    }
+})
+
+export const { update, clearUser } = userSlice.actions;
+export default userSlice.reducer;
+
+
+****** 3 *****
+store.js
+
+import { configureStore } from "@reduxjs/toolkit";
+import userReducer from "./userSlice"
+
+export default configureStore({
+    reducer: {
+        user: userReducer
+    }
+})
+
+
+****** 4 *****
+index.js
+
+import { Provider } from "react-redux";
+import store from "./redux/store";
+
+  <Provider store={store}>
+        <App />
+  </Provider>
+
+**** 5 *****
+import { updateStart, updateSuccess, updateError } from "./userSlice"
+
+import axios from "axios";
+
+
+export const updateUser = async(user, dispatch) => {
+    dispatch(updateStart())
+
+    try{
+        const res = await axios.post(`https://reqres.in/api/login`, user)
+        dispatch(updateSuccess({name: `eve`, email: `eve.holt@reqres.in`}))
+        // dispatch(updateSuccess({name: res.data.name, email: res.data.email}))
+    }catch(err){
+        dispatch(updateError())
+    }
+}
+
+****** 6 *****
+how to use
+
+import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { updateUser } from "../../redux/apiCall";
+import "./HomePage.css";
+
+const HomePage = () => {
+  const dispatch = useDispatch();
+
+  const [email, setEmail] = useState(`eve.holt@reqres.in`);
+  const [password, setPassword] = useState(`cityslicka`);
+
+  const { userInfo, isPending, error } = useSelector((state) => state.user);
+
+  const clickk = () => {
+    if (password !== `` && email !== ``) {
+      updateUser({email, password}, dispatch)
+      setEmail(``);
+      setPassword(``);
+    }
+  };
+
+  if (error) return <p>maybe wrong password!!</p>;
+  return (
+    <div className="home-page">
+      {userInfo.name !== `` && <p>your info: token: {userInfo.token}</p>}
+      <br />
+      <br />
+      {isPending && <p>Loading...</p>}
+      <input
+        type="text"
+        value={email}
+        placeholder="email"
+        onChange={(e) => setEmail(e.target.value)}
+      />{" "}
+      <br />
+      <br />
+      <input
+        type="text"
+        value={password}
+        placeholder="password"
+        onChange={(e) => setPassword(e.target.value)}
+      />{" "}
+      <br />
+      <br />
+      <button onClick={clickk} className="button" disabled={isPending}>
+        UPDATE
+      </button>
+    </div>
+  );
+};
+
+export default HomePage;
+
+
